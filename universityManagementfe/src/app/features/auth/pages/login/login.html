@@ -1,0 +1,37 @@
+<form [formGroup]="loginForm" (ngSubmit)="loginSubmit()">
+  <div class="p-5">
+    <label>Email: </label>
+    <input type="text" name="email" formControlName="loginEmail" class="border"
+      [class.border-black]="!(loginForm.controls.loginEmail.touched && (loginForm.controls.loginEmail.errors?.['required'] || loginForm.controls.loginEmail.errors?.['minlength']))"
+      [class.border-red-500]="(loginForm.controls.loginEmail.touched && (loginForm.controls.loginEmail.errors?.['required']|| loginForm.controls.loginEmail.errors?.['minlength']))"/>
+    @if(loginForm.controls.loginEmail.touched && loginForm.controls.loginEmail.errors?.['required']){
+    <div>
+      <strong class="text-red-500">email required</strong>
+    </div>
+    }
+    @if(loginForm.controls.loginEmail.touched && (loginForm.controls.loginEmail.errors?.['minlength'] || loginForm.controls.loginEmail.errors?.['maxlength'])){
+    <div>
+      <strong class="text-red-500">lenght not matched</strong>
+    </div>
+    }
+  </div>
+  <div class="p-5">
+    <label>Password: </label>
+    <input type="password" name="password" formControlName="loginPassword" class="border"
+      [class.border-black]="!(loginForm.controls.loginPassword.touched && (loginForm.controls.loginPassword.errors?.['required'] || loginForm.controls.loginPassword.errors?.['minlength']))"
+      [class.border-red-500]="(loginForm.controls.loginPassword.touched && (loginForm.controls.loginPassword.errors?.['required'] || loginForm.controls.loginPassword.errors?.['minlength']))" />
+    @if(loginForm.controls.loginPassword.touched && loginForm.controls.loginPassword.errors?.['required']){
+    <div>
+      <strong class="text-red-500">password required</strong>
+    </div>
+    }
+    @if(loginForm.controls.loginPassword.touched && (loginForm.controls.loginPassword.errors?.['minlength'] || loginForm.controls.loginPassword.errors?.['maxlength'])){
+    <div>
+      <strong class="text-red-500">lenght not matched</strong>
+    </div>
+    }
+  </div>
+  <button type="submit" class="py-2 px-4 bg-blue-500 rounded">Login</button>
+</form>
+
+<!--<input type="text" (input)="onType($event)"/>-->

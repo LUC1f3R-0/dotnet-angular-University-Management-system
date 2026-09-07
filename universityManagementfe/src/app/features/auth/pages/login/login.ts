@@ -21,10 +21,16 @@ export class Login {
     ]),
   });
   loginSubmit() {
+    console.log(this.loginForm.controls);
     if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched()
       return
     }
-    console.log(this.loginForm.getRawValue())
+    // console.log(this.loginForm.getRawValue())
   }
+  // onType(event: Event) {
+  //   const value = (event.target as HTMLInputElement).value;
+  //   console.log(value);
+  // }
 }
 
