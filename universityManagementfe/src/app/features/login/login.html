@@ -1,0 +1,11 @@
+<form [formGroup]="loginForm" (ngSubmit)="loginSubmit()">
+  <div class="p-5">
+    <label>Email: </label>
+    <input type="text" name="email" formControlName="loginEmail" class="border border-black"/>
+  </div>
+  <div class="p-5">
+    <label>Password: </label>
+    <input type="password" name="password" formControlName="loginPassword" class="border border-black"/>
+  </div>
+  <button type="submit" class="py-2 px-4 bg-blue-500 rounded">Login</button>
+</form>
