@@ -1,8 +1,14 @@
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Persistence;
 
 public class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){}
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<SecurityEvent> SecurityEvents => Set<SecurityEvent>();
 }

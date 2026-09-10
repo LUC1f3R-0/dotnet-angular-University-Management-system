@@ -4,8 +4,6 @@ namespace Domain.Entities;
 
 public class User
 {
-    private static readonly List<Session> sessions = new List<Session>();
-
     public long Id { get; set; }
     public Guid Uuid { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -34,7 +32,7 @@ public class User
     public DateTimeOffset UpdatedAtUtc { get; set; }
 
     // Relationships
-    public ICollection<Session> Sessions { get; set; } = sessions;
+    public ICollection<Session> Sessions { get; set; } = new List<Session>();
     public ICollection<SecurityEvent> SecurityEvents { get; set; } = new List<SecurityEvent>();
     public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
 }
