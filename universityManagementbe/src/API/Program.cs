@@ -1,4 +1,5 @@
 using API.Exceptions;
+using Application.Authentication.Login;
 using Infrastructure;
 using Infrastructure.Initialization;
 
@@ -10,6 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddScoped<ILoginService, LoginService>();
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
