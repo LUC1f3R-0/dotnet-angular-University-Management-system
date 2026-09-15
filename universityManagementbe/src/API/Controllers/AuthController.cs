@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/[controller]")]
 public sealed class AuthController : ControllerBase
 {
     private readonly ILoginService _loginService;
@@ -20,20 +20,17 @@ public sealed class AuthController : ControllerBase
     public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request,CancellationToken cancellationToken)
     {
         var result = await _loginService.LoginAsync(request.Email, request.Password, HttpContext.Connection.RemoteIpAddress?.ToString(), Request.Headers.UserAgent.ToString(), cancellationToken);
-
-
-        var loginResponse =
-            new LoginResponse
-            {
-                AccessToken = result.AccessToken,
-                AccessTokenExpiresAtUtc = result.AccessTokenExpiresAtUtc,
-                RefreshToken = result.RefreshToken,
-                RefreshTokenExpiresAtUtc = result.RefreshTokenExpiresAtUtc,
-                UserUuid = result.UserUuid,
-                Name = result.Name,
-                Email = result.Email,
-                Role = result.Role
-            };
+        var loginResponse = new LoginResponse
+        {
+            AccessToken = result.AccessToken,
+            AccessTokenExpiresAtUtc = result.AccessTokenExpiresAtUtc,
+            RefreshToken = result.RefreshToken,
+            RefreshTokenExpiresAtUtc = result.RefreshTokenExpiresAtUtc,
+            UserUuid = result.UserUuid,
+            Name = result.Name,
+            Email = result.Email,
+            Role = result.Role
+        };
         return Ok(
             new ApiResponse<LoginResponse>
             {
