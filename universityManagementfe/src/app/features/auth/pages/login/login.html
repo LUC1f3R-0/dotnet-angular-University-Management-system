@@ -1,36 +1,108 @@
-<form [formGroup]="loginForm" (ngSubmit)="loginSubmit()">
-  <div class="p-5">
-    <label>Email: </label>
-    <input type="text" name="email" formControlName="loginEmail" class="border"
-      [class.border-black]="!(loginForm.controls.loginEmail.touched && (loginForm.controls.loginEmail.errors?.['required'] || loginForm.controls.loginEmail.errors?.['minlength']))"
-      [class.border-red-500]="(loginForm.controls.loginEmail.touched && (loginForm.controls.loginEmail.errors?.['required']|| loginForm.controls.loginEmail.errors?.['minlength']))"/>
-    @if(loginForm.controls.loginEmail.touched && loginForm.controls.loginEmail.errors?.['required']){
-    <div>
-      <strong class="text-red-500">email required</strong>
+<div class="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+
+  <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+
+    <div class="mb-8">
+      <p class="text-sm font-semibold uppercase tracking-wider text-blue-600">
+        University Management
+      </p>
+
+      <h1 class="mt-2 text-3xl font-bold text-slate-900">
+        Sign in
+      </h1>
+
+      <p class="mt-2 text-sm text-slate-500">
+        Enter your university account credentials.
+      </p>
     </div>
+
+
+    @if (errorMessage()) {
+      <div class="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        {{ errorMessage() }}
+      </div>
     }
-    @if(loginForm.controls.loginEmail.touched && (loginForm.controls.loginEmail.errors?.['minlength'] || loginForm.controls.loginEmail.errors?.['maxlength'])){
-    <div>
-      <strong class="text-red-500">lenght not matched</strong>
-    </div>
-    }
+
+
+    <form
+      [formGroup]="loginForm"
+      (ngSubmit)="loginSubmit()"
+      class="space-y-5"
+    >
+
+      <div>
+        <label
+          for="email"
+          class="mb-2 block text-sm font-medium text-slate-700"
+        >
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          autocomplete="email"
+          class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        />
+
+        @if (
+          loginForm.controls.email.touched &&
+          loginForm.controls.email.errors?.['required']
+        ) {
+          <p class="mt-1 text-sm text-red-600">
+            Email is required.
+          </p>
+        }
+
+        @if (
+          loginForm.controls.email.touched &&
+          loginForm.controls.email.errors?.['email']
+        ) {
+          <p class="mt-1 text-sm text-red-600">
+            Enter a valid email address.
+          </p>
+        }
+      </div>
+
+
+      <div>
+        <label
+          for="password"
+          class="mb-2 block text-sm font-medium text-slate-700"
+        >
+          Password
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+          class="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+        />
+
+        @if (
+          loginForm.controls.password.touched &&
+          loginForm.controls.password.errors?.['required']
+        ) {
+          <p class="mt-1 text-sm text-red-600">
+            Password is required.
+          </p>
+        }
+      </div>
+
+
+      <button
+        type="submit"
+        [disabled]="isLogging()"
+        class="w-full rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ isLogging() ? 'Signing in...' : 'Sign in' }}
+      </button>
+
+    </form>
+
   </div>
-  <div class="p-5">
-    <label>Password: </label>
-    <input type="password" name="password" formControlName="loginPassword" class="border"
-      [class.border-black]="!(loginForm.controls.loginPassword.touched && (loginForm.controls.loginPassword.errors?.['required'] || loginForm.controls.loginPassword.errors?.['minlength']))"
-      [class.border-red-500]="(loginForm.controls.loginPassword.touched && (loginForm.controls.loginPassword.errors?.['required'] || loginForm.controls.loginPassword.errors?.['minlength']))" />
-    @if(loginForm.controls.loginPassword.touched && loginForm.controls.loginPassword.errors?.['required']){
-    <div>
-      <strong class="text-red-500">password required</strong>
-    </div>
-    }
-    @if(loginForm.controls.loginPassword.touched && (loginForm.controls.loginPassword.errors?.['minlength'] || loginForm.controls.loginPassword.errors?.['maxlength'])){
-    <div>
-      <strong class="text-red-500">lenght not matched</strong>
-    </div>
-    }
-  </div>
-  <button type="submit" class="py-2 px-4 bg-blue-500 rounded">{{ isLogging() ? "logging..." : "login"}}</button>
-</form>
-<!--<input type="text" (input)="onType($event)"/>-->
+
+</div>

@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Application.Authentication.Abstractions;
 using Application.Authentication.Models;
+using Application.Exceptions;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -19,55 +20,78 @@ public sealed class JwtTokenService : ITokenService
         _configuration = configuration;
     }
 
-    public AccessTokenResult CreateAccessToken(User user,Session session)
+    public AccessTokenResult CreateAccessToken(User user, Session session)
     {
-        var key = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is missing.");
-        var issuer = _configuration["Jwt:Issuer"] ?? throw new InvalidOperationException("JWT issuer is missing.");
-        var audience = _configuration["Jwt:Audience"] ?? throw new InvalidOperationException("JWT audience is missing.");
-        var minutesText = _configuration["Jwt:AccessTokenMinutes"];
-        if (!int.TryParse(minutesText, out var accessTokenMinutes))
+        var key = _configuration["Jwt:Key"];
+        var issuer = _configuration["Jwt:Issuer"];
+        var audience = _configuration["Jwt:Audience"];
+
+        if (string.IsNullOrWhiteSpace(key))
         {
-            throw new InvalidOperationException("Jwt:AccessTokenMinutes is invalid.");
+            throw new InvalidRequestOperationException("Jwt:Key is missing.");
+        }
+
+        if (string.IsNullOrWhiteSpace(issuer))
+        {
+            throw new InvalidRequestOperationException("Jwt:Issuer is missing.");
+        }
+
+        if (string.IsNullOrWhiteSpace(audience))
+        {
+            throw new InvalidRequestOperationException("Jwt:Audience is missing.");
+        }
+
+        if (!int.TryParse(_configuration["Jwt:AccessTokenMinutes"], out var accessTokenMinutes))
+        {
+            throw new InvalidRequestOperationException("Jwt:AccessTokenMinutes is invalid.");
         }
 
         var now = DateTimeOffset.UtcNow;
-
         var expiresAt = now.AddMinutes(accessTokenMinutes);
+
         var claims = new List<Claim>
         {
-            new(JwtRegisteredClaimNames.Sub,user.Uuid.ToString()),
-            new(ClaimTypes.Role,user.Role.Name),
+            new(JwtRegisteredClaimNames.Sub, user.Uuid.ToString()),
+            new("role", user.Role.Name),
             new("sid", session.SessionUuid.ToString())
         };
+
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        var token = new JwtSecurityToken(
+        var token =
+        new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
             claims: claims,
             notBefore: now.UtcDateTime,
             expires: expiresAt.UtcDateTime,
             signingCredentials: credentials);
+
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
         return new AccessTokenResult(tokenString, expiresAt);
     }
 
-
     public RefreshTokenResult CreateRefreshToken()
     {
-        var daysText = _configuration["Jwt:RefreshTokenDays"];
-        if (!int.TryParse(daysText, out var refreshTokenDays))
+        if (!int.TryParse(_configuration["Jwt:RefreshTokenDays"], out var refreshTokenDays))
         {
-            throw new InvalidOperationException("Jwt:RefreshTokenDays is invalid.");
+            throw new InvalidRequestOperationException("Jwt:RefreshTokenDays is invalid.");
         }
 
-        var bytes = RandomNumberGenerator.GetBytes(64);
-        var token = Convert.ToHexString(bytes);
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
-        var hash = Convert.ToHexString(hashBytes);
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        var token = Convert.ToHexString(randomBytes);
+        var hash = HashRefreshToken(token);
         var expiresAt = DateTimeOffset.UtcNow.AddDays(refreshTokenDays);
-        
-        return new RefreshTokenResult(token,hash,expiresAt);
+
+        return new RefreshTokenResult(token, hash, expiresAt);
+    }
+
+    public string HashRefreshToken(string refreshToken)
+    {
+        var bytes = Encoding.UTF8.GetBytes(refreshToken);
+        var hashBytes = SHA256.HashData(bytes);
+
+        return Convert.ToHexString(hashBytes);
     }
 }

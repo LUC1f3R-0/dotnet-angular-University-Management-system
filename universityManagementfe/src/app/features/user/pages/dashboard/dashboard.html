@@ -1,1 +1,127 @@
-<p>dashboard works!</p>
+<div class="min-h-screen bg-slate-100">
+
+  <header class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+
+      <div>
+        <p class="text-sm font-semibold text-blue-600">
+          University Management
+        </p>
+
+        <h1 class="text-xl font-bold text-slate-900">
+          Dashboard
+        </h1>
+      </div>
+
+
+      <button
+        type="button"
+        (click)="logout()"
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        Logout
+      </button>
+
+    </div>
+  </header>
+
+
+  <main class="mx-auto max-w-6xl p-6">
+
+    @if (auth.currentUser(); as user) {
+
+      <section class="mb-8 rounded-2xl bg-white p-6 shadow-sm">
+
+        <p class="text-sm text-slate-500">
+          Signed in
+        </p>
+
+        <h2 class="mt-1 text-2xl font-bold text-slate-900">
+          {{ user.name || 'University user' }}
+        </h2>
+
+        @if (user.email) {
+          <p class="mt-1 text-slate-600">
+            {{ user.email }}
+          </p>
+        }
+
+        <div class="mt-5 flex flex-wrap gap-3">
+
+          <span class="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700">
+            {{ user.role }}
+          </span>
+
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
+            {{ user.userUuid }}
+          </span>
+
+        </div>
+
+      </section>
+
+    }
+
+
+    <section class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+      <a
+        routerLink="/profile"
+        class="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+      >
+        <h3 class="font-semibold text-slate-900">
+          Profile
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          View your account profile.
+        </p>
+      </a>
+
+
+      <a
+        routerLink="/attendance"
+        class="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+      >
+        <h3 class="font-semibold text-slate-900">
+          Attendance
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          View attendance information.
+        </p>
+      </a>
+
+
+      <a
+        routerLink="/results"
+        class="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+      >
+        <h3 class="font-semibold text-slate-900">
+          Results
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          View academic results.
+        </p>
+      </a>
+
+
+      <a
+        routerLink="/tasks"
+        class="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+      >
+        <h3 class="font-semibold text-slate-900">
+          Tasks
+        </h3>
+
+        <p class="mt-2 text-sm text-slate-500">
+          View current tasks.
+        </p>
+      </a>
+
+    </section>
+
+  </main>
+
+</div>

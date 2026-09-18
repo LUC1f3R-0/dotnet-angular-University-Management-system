@@ -1,4 +1,4 @@
 export const environment = {
-  baseUrl: '',
+  baseUrl: '/api',
   timeOut: 10000,
 };

@@ -35,8 +35,10 @@ public class SessionConfiguration : IEntityTypeConfiguration<Session>
 
         // Refresh token
         builder.Property(s => s.RefreshTokenHash)
-        .HasMaxLength(500)
+        .HasMaxLength(128)
         .IsRequired();
+        builder.HasIndex(s => s.RefreshTokenHash)
+        .IsUnique();
 
         // Session lifecycle
         builder.Property(s => s.CreatedAtUtc)

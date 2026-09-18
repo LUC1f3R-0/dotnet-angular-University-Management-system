@@ -1,10 +1,7 @@
 namespace API.Models.Responses;
 
-public class ApiResponse<T>
+public sealed class ApiErrorResponse
 {
-    public bool Success { get; init; } = true;
-
+    public bool Success { get; init; } = false;
     public string? Message { get; init; }
-
-    public T? Data { get; init; }
 }

@@ -28,7 +28,7 @@ public class RoleSeeder
             var exists = await _dbContext.Roles.AnyAsync(r => r.Name == roleName);
 
             if (exists)
-                continue;
+            continue;
 
             var role = new Role
             {
