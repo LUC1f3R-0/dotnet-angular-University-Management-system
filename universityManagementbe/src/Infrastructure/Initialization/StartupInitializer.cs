@@ -21,13 +21,16 @@ public class StartupInitializer
     {
         _logger.LogInformation("Checking database connection...");
         var canConnect = await _dbContext.Database.CanConnectAsync();
+
         if (!canConnect)
         {
             _logger.LogCritical("Database connection failed.");
             throw new InvalidOperationException("Unable to connect to the database.");
         }
+        
         _logger.LogInformation("Database connection successful.");
         _logger.LogInformation("Checking SMTP connection...");
+        
         try
         {
             await _smtpValidator.ValidateAsync();
