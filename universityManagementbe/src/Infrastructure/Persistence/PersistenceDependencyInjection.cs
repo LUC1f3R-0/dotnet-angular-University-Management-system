@@ -1,3 +1,4 @@
+using Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -5,22 +6,12 @@ using Npgsql;
 
 namespace Infrastructure.Persistence;
 
-public sealed class DatabaseOptions
-{
-    public const string SectionName = "Database";
-
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string UserName { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-}
-
 public static class PersistenceDependencyInjection
 {
     public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var options = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>() ?? throw new InvalidOperationException("Database configuration section is missing.");
+        var options = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>()
+            ?? throw new InvalidOperationException("Database configuration section is missing.");
 
         if (string.IsNullOrWhiteSpace(options.Host))
             throw new InvalidOperationException("Database host is missing.");

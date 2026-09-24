@@ -1,10 +1,12 @@
 using API.Models.Requests;
 using API.Models.Responses;
+using API.RateLimiting;
 using Application.Authentication.Login;
 using Application.Authentication.Logout;
 using Application.Authentication.Refresh;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace API.Controllers;
 
@@ -26,6 +28,7 @@ public sealed class AuthController : ControllerBase
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.LoginPolicy)]
     [HttpPost("login")]
     public async Task<ActionResult<ApiResponse<LoginResponse>>> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
@@ -52,6 +55,7 @@ public sealed class AuthController : ControllerBase
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.RefreshPolicy)]
     [HttpPost("refresh")]
     public async Task<ActionResult<ApiResponse<object>>> Refresh(CancellationToken cancellationToken)
     {

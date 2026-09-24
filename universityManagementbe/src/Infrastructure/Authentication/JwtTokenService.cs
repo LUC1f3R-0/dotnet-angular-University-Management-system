@@ -4,50 +4,26 @@ using System.Security.Cryptography;
 using System.Text;
 using Application.Authentication.Abstractions;
 using Application.Authentication.Models;
-using Application.Exceptions;
 using Domain.Entities;
-using Microsoft.Extensions.Configuration;
+using Infrastructure.Options;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Authentication;
 
 public sealed class JwtTokenService : ITokenService
 {
-    private readonly IConfiguration _configuration;
+    private readonly JwtOptions _options;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(IOptions<JwtOptions> options)
     {
-        _configuration = configuration;
+        _options = options.Value;
     }
 
     public AccessTokenResult CreateAccessToken(User user, Session session)
     {
-        var key = _configuration["Jwt:Key"];
-        var issuer = _configuration["Jwt:Issuer"];
-        var audience = _configuration["Jwt:Audience"];
-
-        if (string.IsNullOrWhiteSpace(key))
-        {
-            throw new InvalidRequestOperationException("Jwt:Key is missing.");
-        }
-
-        if (string.IsNullOrWhiteSpace(issuer))
-        {
-            throw new InvalidRequestOperationException("Jwt:Issuer is missing.");
-        }
-
-        if (string.IsNullOrWhiteSpace(audience))
-        {
-            throw new InvalidRequestOperationException("Jwt:Audience is missing.");
-        }
-
-        if (!int.TryParse(_configuration["Jwt:AccessTokenMinutes"], out var accessTokenMinutes))
-        {
-            throw new InvalidRequestOperationException("Jwt:AccessTokenMinutes is invalid.");
-        }
-
         var now = DateTimeOffset.UtcNow;
-        var expiresAt = now.AddMinutes(accessTokenMinutes);
+        var expiresAt = now.AddMinutes(_options.AccessTokenMinutes);
 
         var claims = new List<Claim>
         {
@@ -56,12 +32,12 @@ public sealed class JwtTokenService : ITokenService
             new("sid", session.SessionUuid.ToString())
         };
 
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
         var token =
         new JwtSecurityToken(
-            issuer: issuer,
-            audience: audience,
+            issuer: _options.Issuer,
+            audience: _options.Audience,
             claims: claims,
             notBefore: now.UtcDateTime,
             expires: expiresAt.UtcDateTime,
@@ -74,15 +50,10 @@ public sealed class JwtTokenService : ITokenService
 
     public RefreshTokenResult CreateRefreshToken()
     {
-        if (!int.TryParse(_configuration["Jwt:RefreshTokenDays"], out var refreshTokenDays))
-        {
-            throw new InvalidRequestOperationException("Jwt:RefreshTokenDays is invalid.");
-        }
-
         var randomBytes = RandomNumberGenerator.GetBytes(64);
         var token = Convert.ToHexString(randomBytes);
         var hash = HashRefreshToken(token);
-        var expiresAt = DateTimeOffset.UtcNow.AddDays(refreshTokenDays);
+        var expiresAt = DateTimeOffset.UtcNow.AddDays(_options.RefreshTokenDays);
 
         return new RefreshTokenResult(token, hash, expiresAt);
     }

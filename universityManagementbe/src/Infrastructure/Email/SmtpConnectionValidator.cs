@@ -1,30 +1,25 @@
-
+using Infrastructure.Options;
 using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Email;
 
 public class SmtpConnectionValidator
 {
-    private readonly IConfiguration _configuration;
+    private readonly SmtpOptions _options;
 
-    public SmtpConnectionValidator(IConfiguration configuration)
+    public SmtpConnectionValidator(IOptions<SmtpOptions> options)
     {
-        _configuration = configuration;
+        _options = options.Value;
     }
 
     public async Task ValidateAsync()
     {
-        var host = _configuration["Smtp:Host"] ?? throw new InvalidOperationException("SMTP host is missing.");
-        var username = _configuration["Smtp:Username"] ?? throw new InvalidOperationException("SMTP username is missing.");
-        var password = _configuration["Smtp:Password"] ?? throw new InvalidOperationException("SMTP password is missing.");
-        var port = _configuration.GetValue<int>("Smtp:Port");
-        
         using var client = new SmtpClient();
 
-        await client.ConnectAsync(host, port, SecureSocketOptions.Auto);
-        await client.AuthenticateAsync(username, password);
+        await client.ConnectAsync(_options.Host, _options.Port, SecureSocketOptions.Auto);
+        await client.AuthenticateAsync(_options.Username, _options.Password);
         await client.DisconnectAsync(true);
     }
 }

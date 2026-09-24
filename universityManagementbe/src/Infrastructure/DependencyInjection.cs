@@ -3,6 +3,7 @@ using Domain.Entities;
 using Infrastructure.Authentication;
 using Infrastructure.Email;
 using Infrastructure.Initialization;
+using Infrastructure.Options;
 using Infrastructure.Persistence;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Seeding;
@@ -40,8 +41,12 @@ public static class DependencyInjection
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, JwtTokenService>();
 
-        // Lockout policy
+        // Options bindings
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.Configure<SmtpOptions>(configuration.GetSection(SmtpOptions.SectionName));
         services.Configure<AccountLockoutOptions>(configuration.GetSection(AccountLockoutOptions.SectionName));
+
+        // Lockout policy
         services.AddScoped<ILockoutPolicy, LockoutPolicy>();
 
         return services;

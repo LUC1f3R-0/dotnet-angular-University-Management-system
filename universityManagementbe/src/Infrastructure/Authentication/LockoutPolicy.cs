@@ -1,4 +1,5 @@
 using Application.Authentication.Abstractions;
+using Infrastructure.Options;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Authentication;
