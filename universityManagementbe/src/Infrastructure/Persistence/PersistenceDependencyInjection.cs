@@ -1,27 +1,46 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Infrastructure.Persistence;
 
+public sealed class DatabaseOptions
+{
+    public const string SectionName = "Database";
+
+    public string Host { get; set; } = string.Empty;
+    public int Port { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string UserName { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+}
+
 public static class PersistenceDependencyInjection
 {
-    public static IServiceCollection AddPersistence(this IServiceCollection services,IConfiguration configuration)
+    public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
     {
-        var host = configuration["Database:Host"];
-        var port = configuration["Database:Port"];
-        var databaseName = configuration["Database:Name"];
-        var username = configuration["Database:UserName"];
-        var password = configuration["Database:Password"];
+        var options = configuration.GetSection(DatabaseOptions.SectionName).Get<DatabaseOptions>() ?? throw new InvalidOperationException("Database configuration section is missing.");
 
-        if (string.IsNullOrWhiteSpace(host)) throw new InvalidOperationException("Database host is missing.");
-        if (string.IsNullOrWhiteSpace(port)) throw new InvalidOperationException("Database port is missing.");
-        if (string.IsNullOrWhiteSpace(databaseName)) throw new InvalidOperationException("Database name is missing.");
-        if (string.IsNullOrWhiteSpace(username)) throw new InvalidOperationException("Database username is missing.");
+        if (string.IsNullOrWhiteSpace(options.Host))
+            throw new InvalidOperationException("Database host is missing.");
+        if (options.Port <= 0)
+            throw new InvalidOperationException("Database port is missing or invalid.");
+        if (string.IsNullOrWhiteSpace(options.Name))
+            throw new InvalidOperationException("Database name is missing.");
+        if (string.IsNullOrWhiteSpace(options.UserName))
+            throw new InvalidOperationException("Database username is missing.");
 
-        var connectionString = $"Host={host};" + $"Port={port};" + $"Database={databaseName};" + $"Username={username};" + $"Password={password};";
+        var connectionString = new NpgsqlConnectionStringBuilder
+        {
+            Host = options.Host,
+            Port = options.Port,
+            Database = options.Name,
+            Username = options.UserName,
+            Password = options.Password
+        }.ConnectionString;
 
-        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddDbContext<ApplicationDbContext>(o => o.UseNpgsql(connectionString));
         return services;
     }
 }

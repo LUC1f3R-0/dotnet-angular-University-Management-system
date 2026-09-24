@@ -35,4 +35,27 @@ public class User
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
     public ICollection<SecurityEvent> SecurityEvents { get; set; } = new List<SecurityEvent>();
     public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+
+    // --- Behavior: the entity owns its own lockout invariants ---
+
+    public void RegisterFailedLogin(int maxAttempts, TimeSpan lockoutDuration, DateTimeOffset now)
+    {
+        FailedLoginAttempts++;
+        UpdatedAtUtc = now;
+
+        if (FailedLoginAttempts >= maxAttempts)
+        {
+            LockoutUntilUtc = now.Add(lockoutDuration);
+        }
+    }
+
+    public void RegisterSuccessfulLogin(DateTimeOffset now)
+    {
+        FailedLoginAttempts = 0;
+        LockoutUntilUtc = null;
+        UpdatedAtUtc = now;
+    }
+
+    public bool IsLockedOut(DateTimeOffset now) =>
+        LockoutUntilUtc.HasValue && LockoutUntilUtc.Value > now;
 }

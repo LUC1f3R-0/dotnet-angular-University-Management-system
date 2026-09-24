@@ -12,14 +12,16 @@ public sealed class LoginService : ILoginService
     private readonly IPasswordService _passwordService;
     private readonly ITokenService _tokenService;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ILockoutPolicy _lockoutPolicy;
 
-    public LoginService(IUserRepository userRepository, ISessionRepository sessionRepository, IPasswordService passwordService, ITokenService tokenService, IUnitOfWork unitOfWork)
+    public LoginService(IUserRepository userRepository,ISessionRepository sessionRepository,IPasswordService passwordService,ITokenService tokenService,IUnitOfWork unitOfWork,ILockoutPolicy lockoutPolicy)
     {
         _userRepository = userRepository;
         _sessionRepository = sessionRepository;
         _passwordService = passwordService;
         _tokenService = tokenService;
         _unitOfWork = unitOfWork;
+        _lockoutPolicy = lockoutPolicy;
     }
 
     public async Task<LoginResult> LoginAsync(string email, string password, string? ipAddress, string? userAgent, CancellationToken cancellationToken = default)
@@ -39,28 +41,24 @@ public sealed class LoginService : ILoginService
 
         var now = DateTimeOffset.UtcNow;
 
-        if (user.LockoutUntilUtc.HasValue && user.LockoutUntilUtc.Value > now)
+        if (user.IsLockedOut(now))
         {
             throw new UnauthorizedException("This account is temporarily locked.");
         }
 
-        var passwordValid =_passwordService.VerifyPassword(user, password);
+        var passwordValid = _passwordService.VerifyPassword(user, password);
 
         if (!passwordValid)
         {
-            user.FailedLoginAttempts++;
-            user.UpdatedAtUtc = now;
-
+            user.RegisterFailedLogin(_lockoutPolicy.MaxFailedAttempts, _lockoutPolicy.LockoutDuration, now);
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             throw new UnauthorizedException("Email or password is incorrect.");
         }
-        
-        user.FailedLoginAttempts = 0;
-        user.LockoutUntilUtc = null;
-        user.UpdatedAtUtc = now;
 
-        var refreshToken =_tokenService.CreateRefreshToken();
+        user.RegisterSuccessfulLogin(now);
+
+        var refreshToken = _tokenService.CreateRefreshToken();
 
         var session = new Session
         {

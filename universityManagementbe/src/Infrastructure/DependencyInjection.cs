@@ -40,7 +40,10 @@ public static class DependencyInjection
         services.AddScoped<IPasswordService, PasswordService>();
         services.AddScoped<ITokenService, JwtTokenService>();
 
+        // Lockout policy
+        services.Configure<AccountLockoutOptions>(configuration.GetSection(AccountLockoutOptions.SectionName));
+        services.AddScoped<ILockoutPolicy, LockoutPolicy>();
+
         return services;
     }
 }
-

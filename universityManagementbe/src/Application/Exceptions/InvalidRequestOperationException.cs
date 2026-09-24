@@ -1,5 +1,4 @@
 using System.Net;
-using Application.Exceptions;
 
 namespace Application.Exceptions;
 
